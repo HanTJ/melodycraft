@@ -70,8 +70,9 @@ export function PlayerControls({ abc }: Props) {
         audioContext,
         millisecondsPerMeasure: visualObj.millisecondsPerMeasure(),
         options: {
-          // abcjs가 제공하는 공식 사운드폰트 CDN
-          soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/abcjs/",
+          // 보다 완전한 GM 사운드폰트(contrabass 404 회피)
+          soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/",
+          program: undefined, // 보이스별 프로그램을 ABC/MIDI 설정에서 사용
           onEnded: stopPlayback,
         },
       });

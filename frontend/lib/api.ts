@@ -5,13 +5,19 @@ export type GenerateResponse = {
   key: string;
   mood: string;
   highlights: string[];
+  parts: { instrument: string; abc: string }[];
 };
 
-export async function requestGenerate(prompt: string, measures = 4, seed?: number): Promise<GenerateResponse> {
+export async function requestGenerate(
+  prompt: string,
+  measures = 4,
+  seed?: number,
+  instruments?: string[],
+): Promise<GenerateResponse> {
   const res = await fetch("/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, measures, seed }),
+    body: JSON.stringify({ prompt, measures, seed, instruments }),
   });
 
   if (!res.ok) {

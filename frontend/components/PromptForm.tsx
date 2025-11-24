@@ -3,19 +3,28 @@
 import { useState } from "react";
 
 type PromptFormProps = {
-  onSubmit: (prompt: string, measures: number, seed?: number) => void;
+  onSubmit: (prompt: string, measures: number, seed?: number, instruments?: string[]) => void;
   loading: boolean;
 };
+
+const INSTRUMENT_OPTIONS = ["piano", "strings", "bass", "guitar", "flute", "violin", "cello"];
 
 export function PromptForm({ onSubmit, loading }: PromptFormProps) {
   const [prompt, setPrompt] = useState("잔잔하고 따뜻한 피아노 루프");
   const [measures, setMeasures] = useState(4);
   const [seed, setSeed] = useState<string>("");
+  const [selectedInstruments, setSelectedInstruments] = useState<string[]>(["piano", "strings"]);
+
+  const toggleInstrument = (inst: string) => {
+    setSelectedInstruments((prev) =>
+      prev.includes(inst) ? prev.filter((i) => i !== inst) : [...prev, inst]
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const numericSeed = seed === "" ? undefined : Number(seed);
-    onSubmit(prompt.trim(), measures, Number.isNaN(numericSeed) ? undefined : numericSeed);
+    onSubmit(prompt.trim(), measures, Number.isNaN(numericSeed) ? undefined : numericSeed, selectedInstruments);
   };
 
   return (
@@ -78,6 +87,31 @@ export function PromptForm({ onSubmit, loading }: PromptFormProps) {
               }}
             />
           </label>
+        </div>
+        <div>
+          <span className="muted">연주 악기 선택</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+            {INSTRUMENT_OPTIONS.map((inst) => {
+              const active = selectedInstruments.includes(inst);
+              return (
+                <button
+                  type="button"
+                  key={inst}
+                  onClick={() => toggleInstrument(inst)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 10,
+                    border: active ? "1px solid #9be8ff" : "1px solid rgba(255,255,255,0.12)",
+                    background: active ? "rgba(110,231,255,0.15)" : "rgba(255,255,255,0.05)",
+                    color: active ? "#9be8ff" : "var(--text)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {inst}
+                </button>
+              );
+            })}
+          </div>
         </div>
         <div className="actions">
           <button

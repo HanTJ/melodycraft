@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PromptForm } from "../components/PromptForm";
 import { ScoreViewer } from "../components/ScoreViewer";
 import { PlayerControls } from "../components/PlayerControls";
@@ -11,11 +11,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (prompt: string, measures: number, seed?: number) => {
+  const handleSubmit = async (prompt: string, measures: number, seed?: number, instruments?: string[]) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await requestGenerate(prompt, measures, seed);
+      const data = await requestGenerate(prompt, measures, seed, instruments);
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -71,7 +71,7 @@ export default function Home() {
       </div>
 
       <div className="grid" style={{ marginTop: 18 }}>
-        <ScoreViewer abc={result?.abc ?? null} />
+        <ScoreViewer abc={result?.abc ?? null} parts={result?.parts ?? []} />
         <PlayerControls abc={result?.abc ?? null} />
       </div>
     </main>
