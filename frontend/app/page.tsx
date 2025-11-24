@@ -33,7 +33,7 @@ export default function Home() {
           🎹 멜로디를 만들어 보세요
         </h1>
         <p className="subtitle">
-          프롬프트를 입력하면 규칙 기반 생성기가 간단한 악보와 재생 오디오를 만들어 줍니다. 모든 안내는 한국어로 제공됩니다.
+          프롬프트를 입력하면 규칙 기반 생성기가 간단한 악보와 재생 오디오를 만들어 줍니다.
         </p>
         <div className="chips">
           <span className="chip">FastAPI 백엔드</span>

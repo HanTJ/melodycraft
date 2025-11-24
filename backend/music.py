@@ -102,9 +102,11 @@ def diatonic_chords(key: str, is_minor: bool) -> List[str]:
     ]
 
 
-def pick_progression(measures: int, mood: str, key: str, rng: random.Random) -> List[str]:
+def pick_progression(measures: int, mood: str, key: str, rng: random.Random, preferred: Optional[List[str]] = None) -> List[str]:
     is_minor = key.endswith("m")
     chords = diatonic_chords(key.replace("m", ""), is_minor)
+    if preferred:
+        return (preferred * ((measures // len(preferred)) + 1))[:measures]
     progressions = [
         ["I", "IV", "V", "I"],
         ["I", "vi", "IV", "V"],
@@ -184,13 +186,14 @@ def build_measure(chord: str, scale_high: List[str], rng: random.Random, octave_
 
 
 def resolve_profile(prompt: str, ai_hint: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-    ai_mood = normalize_mood(ai_hint.get("mood") if ai_hint else None)
-    profile_key = ai_mood or pick_profile(prompt)
+    profile_key = pick_profile(prompt)
     profile = MOOD_PROFILES[profile_key]
     key = ai_hint.get("key") if ai_hint and ai_hint.get("key") else profile["key"]
     meter = ai_hint.get("meter") if ai_hint and ai_hint.get("meter") else "4/4"
     tempo = ai_hint.get("tempo") if ai_hint and ai_hint.get("tempo") else profile["tempo"]
-    return {"mood": profile_key, "key": key, "meter": meter, "tempo": tempo}
+    chords = ai_hint.get("chords") if ai_hint and ai_hint.get("chords") else None
+    instruments = ai_hint.get("instruments") if ai_hint and ai_hint.get("instruments") else None
+    return {"mood": profile_key, "key": key, "meter": meter, "tempo": tempo, "chords": chords, "instruments": instruments}
 
 
 def generate_abc(
@@ -206,7 +209,7 @@ def generate_abc(
     scale_low, scale_high = select_scale(resolved["key"])
     scale_low = PIANO_LOW  # 피아노 스타일: 중저음 강조
 
-    progression = pick_progression(measures, resolved["mood"], resolved["key"], rng)
+    progression = pick_progression(measures, resolved["mood"], resolved["key"], rng, preferred=resolved.get("chords"))
     def build_part(instrument: str) -> str:
         settings = INSTRUMENT_SETTINGS.get(instrument, INSTRUMENT_SETTINGS["piano"])
         oct_bias = settings["octave_bias"]
@@ -222,7 +225,7 @@ def generate_abc(
                 return valid
         return ["piano", "strings"]
 
-    instruments = resolve_instruments(instruments_requested or (ai_hint.get("instruments") if ai_hint else None))
+    instruments = resolve_instruments(instruments_requested or resolved.get("instruments"))
 
     parts: List[Dict[str, Any]] = []
     voice_bodies: List[str] = []
@@ -250,7 +253,8 @@ def generate_abc(
         midi_defs.append(f"%%MIDI program {idx} {program}")
         voice_bodies.append(f"[V:{idx}] {part_body}")
 
-    abc_body = "\n".join(voice_bodies) + "\n|]"
+    # 각 보이스는 내부적으로 |]로 종료되므로 최종 |]는 추가하지 않는다.
+    abc_body = "\n".join(voice_bodies)
     abc_header = "\n".join(
         [
             "X:1",
@@ -270,13 +274,57 @@ def generate_abc(
         "key": resolved["key"],
         "mood": resolved["mood"],
         "parts": parts,
-        "highlights": [
-            f"키: {resolved['key']}",
-            f"템포: {resolved['tempo']} BPM",
-            f"마디 수: {measures}",
-            f"분위기 감지: {resolved['mood']}",
-            f"화성 진행: {' - '.join(progression)}",
-            f"파트: {', '.join(instruments)}",
-            "프롬프트 해석: ChatGPT 사용" if ai_hint and get_openai_api_key() else "프롬프트 해석: 기본 규칙 기반",
-        ],
+        "progression": progression,
     }
+
+
+def summarize_with_music21(abc_text: str) -> str:
+    try:
+        stream = converter.parseData(abc_text, format="abc")
+        detected = stream.analyze("key")
+        pitches = [p for p in stream.recurse().pitches]
+        if pitches:
+            low = min(p.midi for p in pitches)
+            high = max(p.midi for p in pitches)
+        else:
+            low = high = None
+        return f"detected_key={detected}, pitch_range={low}-{high}, parts={len(stream.parts)}"
+    except Exception as e:
+        return f"analysis_failed: {e}"
+
+
+def refine_with_music21(abc_text: str, target_key: str, base_tempo: int, directives: Dict[str, Any]):
+    """
+    - 목표 키와 directive의 transpose/tempo 제안을 반영.
+    - abcjs 헤더(Q:)의 템포를 업데이트.
+    - 실패하면 원본 그대로 반환.
+    """
+    tempo = base_tempo + int(directives.get("tempo_adjust", 0) or 0)
+    transpose_semitones = int(directives.get("transpose_semitones", 0) or 0)
+    try:
+        stream = converter.parseData(abc_text, format="abc")
+        # 키 맞추기
+        detected = stream.analyze("key")
+        if target_key and detected:
+            try:
+                interval_to_target = interval.Interval(detected.tonic, m21key.Key(target_key).tonic)
+                stream = stream.transpose(interval_to_target)
+            except Exception:
+                pass
+        if transpose_semitones:
+            stream = stream.transpose(transpose_semitones)
+
+        with tempfile.NamedTemporaryFile("w+", suffix=".abc", delete=False) as tmp:
+            path = Path(tmp.name)
+            stream.write("abc", fp=path)
+            abc_output = path.read_text()
+        # tempo 반영
+        lines = []
+        for line in abc_output.splitlines():
+            if line.startswith("Q:"):
+                lines.append(f"Q:1/4={tempo}")
+            else:
+                lines.append(line)
+        return "\n".join(lines), tempo
+    except Exception:
+        return abc_text, tempo

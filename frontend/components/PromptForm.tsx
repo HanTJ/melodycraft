@@ -10,10 +10,10 @@ type PromptFormProps = {
 const INSTRUMENT_OPTIONS = ["piano", "strings", "bass", "guitar", "flute", "violin", "cello"];
 
 export function PromptForm({ onSubmit, loading }: PromptFormProps) {
-  const [prompt, setPrompt] = useState("잔잔하고 따뜻한 피아노 루프");
-  const [measures, setMeasures] = useState(4);
+  const [prompt, setPrompt] = useState("잔잔하고 서정적인 클래식 피아노 소나타, 서서히 고조되다 마지막에 종결감 있게 마무리");
+  const [measures, setMeasures] = useState(16);
   const [seed, setSeed] = useState<string>("");
-  const [selectedInstruments, setSelectedInstruments] = useState<string[]>(["piano", "strings"]);
+  const [selectedInstruments, setSelectedInstruments] = useState<string[]>(["piano"]);
 
   const toggleInstrument = (inst: string) => {
     setSelectedInstruments((prev) =>
@@ -55,11 +55,11 @@ export function PromptForm({ onSubmit, loading }: PromptFormProps) {
         </label>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span className="muted">마디 수 (2-16)</span>
+            <span className="muted">마디 수 (2-64)</span>
             <input
               type="number"
               min={2}
-              max={16}
+              max={64}
               value={measures}
               onChange={(e) => setMeasures(Number(e.target.value))}
               style={{
@@ -89,7 +89,7 @@ export function PromptForm({ onSubmit, loading }: PromptFormProps) {
           </label>
         </div>
         <div>
-          <span className="muted">연주 악기 선택</span>
+          <span className="muted">연주 악기 선택(1개)</span>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
             {INSTRUMENT_OPTIONS.map((inst) => {
               const active = selectedInstruments.includes(inst);
@@ -97,7 +97,7 @@ export function PromptForm({ onSubmit, loading }: PromptFormProps) {
                 <button
                   type="button"
                   key={inst}
-                  onClick={() => toggleInstrument(inst)}
+                  onClick={() => setSelectedInstruments([inst])}
                   style={{
                     padding: "8px 12px",
                     borderRadius: 10,
@@ -131,7 +131,6 @@ export function PromptForm({ onSubmit, loading }: PromptFormProps) {
           >
             {loading ? "생성 중..." : "생성하기"}
           </button>
-          <span className="status">모든 안내는 한국어로 제공됩니다.</span>
         </div>
       </div>
     </form>

@@ -121,18 +121,6 @@ export function ScoreViewer({ abc, parts = [] }: Props) {
           {formattedAbc}
         </pre>
       )}
-      {parts.length > 0 && (
-        <div style={{ marginTop: 10 }}>
-          <span className="muted">파트별 미리보기</span>
-          <ul style={{ margin: 0, paddingLeft: 18, color: "var(--muted)" }}>
-            {parts.map((p, idx) => (
-              <li key={idx}>
-                <strong>{p.instrument}</strong> - {p.abc.slice(0, 60)}...
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
       {!abc && <p className="muted">아직 생성된 악보가 없습니다.</p>}
     </div>
   );
