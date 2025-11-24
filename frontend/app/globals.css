@@ -1,0 +1,138 @@
+:root {
+  --bg: #0b1021;
+  --panel: #10172b;
+  --accent: #6ee7ff;
+  --accent-2: #f472b6;
+  --text: #e8ecf7;
+  --muted: #9fb2d6;
+  --shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(120% 120% at 20% 20%, rgba(110, 231, 255, 0.08), transparent),
+    radial-gradient(120% 120% at 80% 0%, rgba(244, 114, 182, 0.08), transparent),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.card {
+  background: linear-gradient(135deg, rgba(16, 23, 43, 0.7), rgba(16, 23, 43, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.chip {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(110, 231, 255, 0.1);
+  color: var(--accent);
+  font-weight: 600;
+  border: 1px solid rgba(110, 231, 255, 0.3);
+}
+
+.abc-container {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 12px;
+  min-height: 180px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+@media (max-width: 720px) {
+  .title {
+    font-size: 26px;
+  }
+  .page {
+    padding: 24px 16px 36px;
+  }
+}

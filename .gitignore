@@ -1,0 +1,29 @@
+# OS / Editor
+.DS_Store
+*.swp
+*.swo
+
+# Node/Next.js
+frontend/node_modules
+frontend/.next
+frontend/.vercel
+frontend/.turbo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+backend/.venv
+backend/__pycache__
+backend/*.pyc
+
+# Env / secrets
+*.env
+*/.env
+backend/.env
+
+# Build/coverage
+coverage/
+*.coverage
+dist/
+build/

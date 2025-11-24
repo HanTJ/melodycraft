@@ -1,0 +1,105 @@
+"use client";
+
+import { useState } from "react";
+
+type PromptFormProps = {
+  onSubmit: (prompt: string, measures: number, seed?: number) => void;
+  loading: boolean;
+};
+
+export function PromptForm({ onSubmit, loading }: PromptFormProps) {
+  const [prompt, setPrompt] = useState("잔잔하고 따뜻한 피아노 루프");
+  const [measures, setMeasures] = useState(4);
+  const [seed, setSeed] = useState<string>("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const numericSeed = seed === "" ? undefined : Number(seed);
+    onSubmit(prompt.trim(), measures, Number.isNaN(numericSeed) ? undefined : numericSeed);
+  };
+
+  return (
+    <form className="card" onSubmit={handleSubmit}>
+      <h2 className="title">
+        🎛️ 프롬프트 입력
+      </h2>
+      <p className="subtitle">어떤 분위기의 음악을 만들까요? 키워드를 적어주세요.</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <span className="muted">프롬프트</span>
+          <textarea
+            required
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="예) 몽환적이고 서정적인 일렉 피아노, 저녁 노을"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 12,
+              padding: "12px 14px",
+              color: "var(--text)",
+              minHeight: 96,
+              resize: "vertical",
+              fontSize: 15,
+            }}
+          />
+        </label>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span className="muted">마디 수 (2-16)</span>
+            <input
+              type="number"
+              min={2}
+              max={16}
+              value={measures}
+              onChange={(e) => setMeasures(Number(e.target.value))}
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 12,
+                padding: "12px 14px",
+                color: "var(--text)",
+              }}
+            />
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span className="muted">시드 (옵션)</span>
+            <input
+              type="number"
+              placeholder="랜덤 고정용"
+              value={seed}
+              onChange={(e) => setSeed(e.target.value)}
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 12,
+                padding: "12px 14px",
+                color: "var(--text)",
+              }}
+            />
+          </label>
+        </div>
+        <div className="actions">
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: "12px 18px",
+              borderRadius: 12,
+              border: "none",
+              background: "linear-gradient(135deg, #6ee7ff, #f472b6)",
+              color: "#0b1021",
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 14px 40px rgba(94, 234, 212, 0.25)",
+              opacity: loading ? 0.7 : 1,
+            }}
+          >
+            {loading ? "생성 중..." : "생성하기"}
+          </button>
+          <span className="status">모든 안내는 한국어로 제공됩니다.</span>
+        </div>
+      </div>
+    </form>
+  );
+}
